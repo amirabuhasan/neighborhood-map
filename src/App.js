@@ -1,18 +1,25 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Sidebar from "./Sidebar"
+import MapContainer from "./Map"
 
 class App extends Component {
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          Neighborhood Map
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <div className="main-container">
+          <div className="sidebar-container">
+            <Sidebar></Sidebar>
+          </div>
+          <div className="map-container">
+            <MapContainer></MapContainer>
+          </div>
+        </div>
+        <footer></footer>
       </div>
     );
   }
