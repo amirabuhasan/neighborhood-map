@@ -8,11 +8,21 @@
   grid-gap: 20px;
 }
 
+html, body, #root, .App, .map-container, #map {
+  height: 100%;
+}
+
+
+.main-container {
+  height: 100%;
+}
+
 .main-container {
   grid-area: main-container;
   display: grid;
   grid-template-columns: 1fr 3fr;
   grid-template-areas:
+    "sidebar-container" "map-container"
     "sidebar-container" "map-container";
   grid-gap: 20px;
 }
@@ -35,6 +45,7 @@
 footer {
   grid-area: footer;
 }
+
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
