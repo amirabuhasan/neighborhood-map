@@ -17,53 +17,48 @@ class App extends Component {
   componentDidMount() {
     window.map = new google.maps.Map(document.getElementById("map"), {
       center: new google.maps.LatLng(4.210483999999999, 101.97576600000002),
-      zoom: 8
+      zoom: 6
     });
     this.checkUserLocation()
+  }
+
+  componentDidUpdate() {
+    window.map.setCenter(this.state.currentLocation)
+    this.createMarker()
   }
 
   checkUserLocation() {
     const self = this;
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
-        self.setState(state => ({
+        self.setState({
           currentLocation: {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           }
-        }))
-        self.serviceSearch()
-        // self.serviceSearch();
-      }, function() {
+        }, () => self.serviceSearch()
+      )}, function() {
         alert("You denied access!");
       })
     }
-  };
+  }
 
   createMarker = () => {
     let self = this
+    let bounds = new google.maps.LatLngBounds()
     this.state.markers.map((marker) => {
       let newMarker = new window.google.maps.Marker({
         map: window.map,
         position: marker.geometry.location,
         id: marker.place_id
       })
-      // console.log(marker.place_id)
       var infowindow = new google.maps.InfoWindow()
        newMarker.addListener('click', function() {
         self.getPlacesDetails(this, infowindow)
       });
+      bounds.extend(marker.geometry.location)
     })
-  }
-
-  createInfoWindow = () => {
-    let self = this
-    this.state.markers.map((marker) => {
-      var infowindow = new google.maps.InfoWindow()
-       marker.addListener('click', function() {
-        self.getPlacesDetails(this, infowindow)
-      });
-    })
+    window.map.fitBounds(bounds);
   }
 
   searchPlaces = () => {
@@ -79,20 +74,10 @@ class App extends Component {
             lat: results[0].geometry.location.lat(),
             lng: results[0].geometry.location.lng()
           }
-        }, () => {
-          window.map.setCenter(self.state.currentLocation)
-          self.serviceSearch()
-        })
-      }
-    });
+        }, () => self.serviceSearch()
+      )}
+    })
   }
-
-  componentDidUpdate() {
-    window.map.setCenter(this.state.currentLocation)
-    this.createMarker()
-  }
-
-
 
   serviceSearch = () => {
     let service = new google.maps.places.PlacesService(window.map);
@@ -113,7 +98,6 @@ class App extends Component {
 
   getPlacesDetails = (marker, infowindow) => {
     let service = new google.maps.places.PlacesService(window.map);
-    console.log(window.map)
     service.getDetails({
       placeId: marker.id
     }, function(place, status) {
@@ -151,11 +135,10 @@ class App extends Component {
         // Make sure the marker property is cleared if the infowindow is closed.
         infowindow.addListener('closeclick', function() {
           infowindow.marker = null;
-        });
+        })
       }
-    });
-  };
-
+    })
+  }
 
   render() {
     return (
