@@ -1,4 +1,5 @@
 /*global google*/
+/*global Swiper*/
 
 import React, { Component } from 'react';
 import logo from './logo.svg';
@@ -21,9 +22,27 @@ class App extends Component {
   }
 
   createMarker = () => {
-    this.state.locations.map((l) => new window.google.maps.Marker({
-      map: window.map,
-      position: {lat: l.geometry.location.lat(), lng: l.geometry.location.lng()}
+    this.state.locations.map((place) => {
+      let marker = new window.google.maps.Marker({
+        map: window.map,
+        position: {lat: place.geometry.location.lat(), lng: place.geometry.location.lng()},
+        title: place.name,
+        openNow: place.opening_hours,
+        id: place.place_id
+      })
+      this.setState(state => ({
+        markers: [...this.state.markers, marker]
+      }))
+    })
+  }
+
+  createInfoWindow = () => {
+    let self = this
+    this.state.markers.map((marker) => {
+      var infowindow = new google.maps.InfoWindow()
+       marker.addListener('click', function() {
+        self.getPlacesDetails(this, infowindow)
+      });
     })
   }
 
@@ -44,6 +63,7 @@ class App extends Component {
         window.map.setCenter(self.state.currentLocation)
         self.serviceSearch()
         self.createMarker()
+        self.createInfoWindow()
       }
     });
   }
@@ -62,6 +82,51 @@ class App extends Component {
       this.setState({locations: results})
     }
   }
+
+  getPlacesDetails = (marker, infowindow) => {
+    let service = new google.maps.places.PlacesService(window.map);
+    console.log(window.map)
+    service.getDetails({
+      placeId: marker.id
+    }, function(place, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        var innerHTML = `<div class="map-info-window" id="${place.id}" name="${place.id}">`;
+        if (place.name) {
+          innerHTML += '<strong>' + place.name + '</strong>';
+        }
+        if (place.formatted_address) {
+          innerHTML += '<br>' + place.formatted_address;
+        }
+        if (place.photos) {
+          innerHTML += `<br><br><div class="swiper-container"><div class="swiper-wrapper">`
+          for (let i = 0; i < place.photos.length; i++){
+            innerHTML += '<div class="swiper-slide"><img src="' + place.photos[i].getUrl(
+                {maxHeight: 200, maxWidth: 300}) + '"></div>';
+          }
+          innerHTML += `</div><div class="swiper-pagination"></div>`
+          innerHTML +="</div>";
+        }
+
+        if (place.place_id) {
+          innerHTML += `<div class="infowindow-button-container text-center">`
+          if (place.formatted_phone_number) {
+            innerHTML += "<hr>"
+            innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('tel:${place.formatted_phone_number}','_self')"><i class="fas fa-phone" aria-hidden="true"></i><br>Call</button>`
+          }
+          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat()},${place.geometry.location.lng()}&query_place_id=${place.place_id}');"><i class="fas fa-compass  " aria-hidden="true"></i><br>Get Directions</button>`
+          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff[nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');"><i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber</button>`
+          innerHTML += "</div>"
+        }
+        innerHTML += '</div>';
+        infowindow.setContent(innerHTML);
+        infowindow.open(window.map, marker);
+        // Make sure the marker property is cleared if the infowindow is closed.
+        infowindow.addListener('closeclick', function() {
+          infowindow.marker = null;
+        });
+      }
+    });
+  };
 
 
   render() {

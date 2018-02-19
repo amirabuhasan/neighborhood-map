@@ -46,6 +46,28 @@ footer {
   grid-area: footer;
 }
 
+/*Info Window*/
+.infowindow-buttons {
+  padding: 10px;
+  font-size: 1em;
+  width: 25%;
+  background-color: Transparent;
+  outline: none;
+  border: none;
+}
+
+.infowindow-buttons:hover {
+  color: Crimson;
+}
+
+
+.map-info-window {
+  border-color: black;
+  max-width: 300px;
+}
+
+
+
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
