@@ -1,29 +1,30 @@
 /*global google*/
 
 import React, { Component } from 'react';
+import Search from "./Search"
 
 class Sidebar extends Component {
-  componentDidMount() {
-    const searchBox = new google.maps.places.SearchBox(
-      document.getElementById("search-text")
-    );
-  }
+
   render() {
+    const {locations, markers, newMarker, getPlacesDetails} = this.props
     return(
       <div>
         <div className="sidebar-header">
           <h3>Find workshops near you</h3>
         </div>
-        <div className="sidebar-search">
-          <p className="text">Search for nearby workshops around a location</p>
-          <input id="search-text" type="text" placeholder="Ex: Petaling Jaya" />
-          <input type="button"
-            value="Go"
-            onClick={this.props.searchPlaces}
-          />
-        </div>
-        <div className="sidebar-listing">
-
+        <Search
+          searchPlaces={this.props.searchPlaces}
+        />
+        <div className="sidebar-listing-container">
+          <ul className="sidebar-listing">
+            {markers.map((marker) => (
+              <li
+                key={marker.id}
+                onClick={() => {google.maps.event.trigger(marker, "click")}}
+                >{marker.name}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     )

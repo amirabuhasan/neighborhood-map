@@ -1,5 +1,4 @@
 /*global google*/
-/*global Swiper*/
 
 import React, { Component } from 'react';
 import logo from './logo.svg';
@@ -7,11 +6,15 @@ import './App.css';
 import Sidebar from "./Sidebar"
 import MapContainer from "./Map"
 
+
 class App extends Component {
-  state = {
-    locations: [],
-    markers: [],
-    currentLocation: {}
+  constructor(props) {
+    super(props)
+    this.state = {
+      locations: [],
+      markers: [],
+      currentLocation: {}
+    }
   }
 
   componentDidMount() {
@@ -22,9 +25,15 @@ class App extends Component {
     this.checkUserLocation()
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(previousProps, previousState) {
     window.map.setCenter(this.state.currentLocation)
-    this.createMarker()
+    if (previousState.locations !== this.state.locations) {
+      this.state.markers.map((marker) => {
+        marker.setMap(null)
+      })
+      this.setState({ markers: [] })
+      this.createMarker()
+    }
   }
 
   checkUserLocation() {
@@ -44,21 +53,69 @@ class App extends Component {
   }
 
   createMarker = () => {
+    let markers = []
     let self = this
     let bounds = new google.maps.LatLngBounds()
-    this.state.markers.map((marker) => {
-      let newMarker = new window.google.maps.Marker({
+    this.state.locations.map((location) => {
+      let marker = new window.google.maps.Marker({
         map: window.map,
-        position: marker.geometry.location,
-        id: marker.place_id
+        position: location.geometry.location,
+        id: location.place_id,
+        name: location.name
       })
       var infowindow = new google.maps.InfoWindow()
-       newMarker.addListener('click', function() {
+       marker.addListener('click', function() {
         self.getPlacesDetails(this, infowindow)
       });
-      bounds.extend(marker.geometry.location)
+      markers.push(marker)
+      bounds.extend(location.geometry.location)
     })
+    this.setState({markers: markers})
     window.map.fitBounds(bounds);
+  }
+
+
+  getPlacesDetails = (marker, infowindow) => {
+    let service = new google.maps.places.PlacesService(window.map);
+    service.getDetails({
+      placeId: marker.id
+    }, function(place, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        var innerHTML = `<div class="map-info-window" id="${place.id}" name="${place.id}">`;
+        if (place.name) {
+          innerHTML += '<strong>' + place.name + '</strong>';
+        }
+        if (place.formatted_address) {
+          innerHTML += '<br>' + place.formatted_address;
+        }
+        if (place.photos) {
+          innerHTML += `<br><br><div class="swiper-container"><div class="swiper-wrapper">`
+          for (let i = 0; i < place.photos.length; i++){
+            innerHTML += '<div class="swiper-slide"><img src="' + place.photos[i].getUrl(
+                {maxHeight: 200, maxWidth: 300}) + '"></div>';
+          }
+          innerHTML += `</div><div class="swiper-pagination"></div>`
+          innerHTML +="</div>";
+        }
+        if (place.place_id) {
+          innerHTML += `<div class="infowindow-button-container text-center">`
+          if (place.formatted_phone_number) {
+            innerHTML += "<hr>"
+            innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('tel:${place.formatted_phone_number}','_self')"><i class="fas fa-phone" aria-hidden="true"></i><br>Call</button>`
+          }
+          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat()},${place.geometry.location.lng()}&query_place_id=${place.place_id}');"><i class="fas fa-compass  " aria-hidden="true"></i><br>Get Directions</button>`
+          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff[nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');"><i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber</button>`
+          innerHTML += "</div>"
+        }
+        innerHTML += '</div>';
+        infowindow.setContent(innerHTML);
+        infowindow.open(window.map, marker);
+        // Make sure the marker property is cleared if the infowindow is closed.
+        infowindow.addListener('closeclick', function() {
+          infowindow.marker = null;
+        })
+      }
+    })
   }
 
   searchPlaces = () => {
@@ -92,52 +149,7 @@ class App extends Component {
     let self = this
     if (status == google.maps.places.PlacesServiceStatus.OK) {
       this.setState({locations: results})
-      this.setState({markers: results})
     }
-  }
-
-  getPlacesDetails = (marker, infowindow) => {
-    let service = new google.maps.places.PlacesService(window.map);
-    service.getDetails({
-      placeId: marker.id
-    }, function(place, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        var innerHTML = `<div class="map-info-window" id="${place.id}" name="${place.id}">`;
-        if (place.name) {
-          innerHTML += '<strong>' + place.name + '</strong>';
-        }
-        if (place.formatted_address) {
-          innerHTML += '<br>' + place.formatted_address;
-        }
-        if (place.photos) {
-          innerHTML += `<br><br><div class="swiper-container"><div class="swiper-wrapper">`
-          for (let i = 0; i < place.photos.length; i++){
-            innerHTML += '<div class="swiper-slide"><img src="' + place.photos[i].getUrl(
-                {maxHeight: 200, maxWidth: 300}) + '"></div>';
-          }
-          innerHTML += `</div><div class="swiper-pagination"></div>`
-          innerHTML +="</div>";
-        }
-
-        if (place.place_id) {
-          innerHTML += `<div class="infowindow-button-container text-center">`
-          if (place.formatted_phone_number) {
-            innerHTML += "<hr>"
-            innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('tel:${place.formatted_phone_number}','_self')"><i class="fas fa-phone" aria-hidden="true"></i><br>Call</button>`
-          }
-          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat()},${place.geometry.location.lng()}&query_place_id=${place.place_id}');"><i class="fas fa-compass  " aria-hidden="true"></i><br>Get Directions</button>`
-          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff[nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');"><i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber</button>`
-          innerHTML += "</div>"
-        }
-        innerHTML += '</div>';
-        infowindow.setContent(innerHTML);
-        infowindow.open(window.map, marker);
-        // Make sure the marker property is cleared if the infowindow is closed.
-        infowindow.addListener('closeclick', function() {
-          infowindow.marker = null;
-        })
-      }
-    })
   }
 
   render() {
@@ -150,6 +162,11 @@ class App extends Component {
           <div className="sidebar-container">
             <Sidebar
               searchPlaces={this.searchPlaces}
+              map={window.map}
+              locations={this.state.locations}
+              markers={this.state.markers}
+              newMarker={window.newMarker}
+              getPlacesDetails={this.getPlacesDetails}
               >
               </Sidebar>
           </div>
