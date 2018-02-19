@@ -19,20 +19,40 @@ class App extends Component {
       center: new google.maps.LatLng(4.210483999999999, 101.97576600000002),
       zoom: 8
     });
+    this.checkUserLocation()
   }
 
-  createMarker = () => {
-    this.state.locations.map((place) => {
-      let marker = new window.google.maps.Marker({
-        map: window.map,
-        position: {lat: place.geometry.location.lat(), lng: place.geometry.location.lng()},
-        title: place.name,
-        openNow: place.opening_hours,
-        id: place.place_id
+  checkUserLocation() {
+    const self = this;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        self.setState(state => ({
+          currentLocation: {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          }
+        }))
+        self.serviceSearch()
+        // self.serviceSearch();
+      }, function() {
+        alert("You denied access!");
       })
-      this.setState(state => ({
-        markers: [...this.state.markers, marker]
-      }))
+    }
+  };
+
+  createMarker = () => {
+    let self = this
+    this.state.markers.map((marker) => {
+      let newMarker = new window.google.maps.Marker({
+        map: window.map,
+        position: marker.geometry.location,
+        id: marker.place_id
+      })
+      // console.log(marker.place_id)
+      var infowindow = new google.maps.InfoWindow()
+       newMarker.addListener('click', function() {
+        self.getPlacesDetails(this, infowindow)
+      });
     })
   }
 
@@ -54,21 +74,27 @@ class App extends Component {
       bounds: window.map.getBounds()
     }, function(results, status) {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        self.setState(state => ({
+        self.setState({
           currentLocation: {
             lat: results[0].geometry.location.lat(),
             lng: results[0].geometry.location.lng()
           }
-        }))
-        window.map.setCenter(self.state.currentLocation)
-        self.serviceSearch()
-        self.createMarker()
-        self.createInfoWindow()
+        }, () => {
+          window.map.setCenter(self.state.currentLocation)
+          self.serviceSearch()
+        })
       }
     });
   }
 
-  serviceSearch() {
+  componentDidUpdate() {
+    window.map.setCenter(this.state.currentLocation)
+    this.createMarker()
+  }
+
+
+
+  serviceSearch = () => {
     let service = new google.maps.places.PlacesService(window.map);
     service.nearbySearch({
       location: this.state.currentLocation,
@@ -78,8 +104,10 @@ class App extends Component {
   }
 
   callback = (results, status) => {
+    let self = this
     if (status == google.maps.places.PlacesServiceStatus.OK) {
       this.setState({locations: results})
+      this.setState({markers: results})
     }
   }
 
