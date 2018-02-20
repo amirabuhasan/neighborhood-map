@@ -4,35 +4,36 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Sidebar from "./Sidebar"
-import MapContainer from "./Map"
+import Map from "./Map"
 
 
 class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      locations: [],
+      places: [],
       markers: [],
       userMarker: [],
       currentLocation: {}
     }
   }
 
+  // initializes the map. Checks for user's location, creates initial user marker and markers.
   componentDidMount() {
     window.map = new google.maps.Map(document.getElementById("map"), {
       center: new google.maps.LatLng(4.210483999999999, 101.97576600000002),
       zoom: 6
     });
+
     this.checkUserLocation()
     this.createUserMarker()
-    this.createMarker()
-
-    console.log(this.state.locations)
+    this.createMarkers()
   }
 
+  // everytime the dom re-renders i.e. because user conducts a search,
+  // clears all markers on the map, and creates new ones based on user's new location
   componentDidUpdate(previousProps, previousState) {
-    // window.map.setCenter(this.state.currentLocation)
-    if (previousState.locations !== this.state.locations) {
+    if (previousState.places !== this.state.places) {
       this.state.userMarker.setMap(null)
       this.state.markers.map((marker) => {
         marker.setMap(null)
@@ -40,10 +41,12 @@ class App extends Component {
       this.setState({ userMarker: [] })
       this.setState({ markers: [] })
       this.createUserMarker()
-      this.createMarker()
+      this.createMarkers()
     }
   }
 
+  // Checks a user's current location using the browser's gps.
+  // Conducts a service search for workshops nearby by calling serviceSearch()
   checkUserLocation() {
     const self = this;
     if (navigator.geolocation) {
@@ -60,31 +63,32 @@ class App extends Component {
     }
   }
 
-  createMarker = () => {
+  // creates markers on the map for each location. Also adds click listeners.
+  createMarkers = () => {
     let markers = []
     let self = this
     let bounds = new google.maps.LatLngBounds()
     var infowindow = new google.maps.InfoWindow()
-    this.state.locations.map((location) => {
-      console.log(location)
+    this.state.places.map((place) => {
       let marker = new window.google.maps.Marker({
         map: window.map,
-        position: location.geometry.location,
-        id: location.place_id,
-        name: location.name,
-        distance: location.distance
+        position: place.geometry.location,
+        id: place.place_id,
+        name: place.name,
+        distance: place.distance
       })
       marker.addListener('click', function() {
        console.log(this)
        self.getPlacesDetails(this, infowindow)
       });
       markers.push(marker)
-      bounds.extend(location.geometry.location)
+      bounds.extend(place.geometry.location)
     })
-    this.setState({markers: markers})
+    this.setState({ markers: markers })
     window.map.fitBounds(bounds)
   }
 
+  // Creates a marker to display user's current/searched location
   createUserMarker() {
     let image = "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"
     let marker = new google.maps.Marker({
@@ -103,6 +107,8 @@ class App extends Component {
     this.setState({userMarker: marker})
   }
 
+
+  // Get's the place details of a clicked marker, and appends it to the info windows.
   getPlacesDetails = (marker, infowindow) => {
     let service = new google.maps.places.PlacesService(window.map);
     service.getDetails({
@@ -147,7 +153,6 @@ class App extends Component {
         innerHTML += '</div>';
         infowindow.setContent(innerHTML);
         infowindow.open(window.map, marker);
-        // Make sure the marker property is cleared if the infowindow is closed.
         infowindow.addListener('closeclick', function() {
           infowindow.marker = null;
         })
@@ -155,6 +160,8 @@ class App extends Component {
     })
   }
 
+  // Conducts a text search using Google's textSearch, and set's the currentLocation
+  // to the searched location. Also searches for nearby workshops by calling serviceSearch()
   searchPlaces = () => {
     let self = this;
     let placesService = new google.maps.places.PlacesService(window.map);
@@ -173,6 +180,8 @@ class App extends Component {
     })
   }
 
+  // Searches for nearby workshops using Google's nearbySearch, and passes a callback method
+  // to handle the results
   serviceSearch = () => {
     let service = new google.maps.places.PlacesService(window.map);
     service.nearbySearch({
@@ -182,6 +191,8 @@ class App extends Component {
     }, this.callback)
   }
 
+  // Returns the results of the search and updates the places state with the results.
+  // Also runs calculateDistance()
   callback = (results, status) => {
     let self = this
     if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -190,10 +201,11 @@ class App extends Component {
                                 result.geometry.location.lat(), result.geometry.location.lng(),
                                 result)
       })
-      this.setState({locations: results})
+      this.setState({places: results})
     }
   }
 
+  // calculates the distance between a place and a user's currentLocation
   calculateDistance = (originLat, originLng, destinationLat, destinationLng, location) => {
     let distance = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(originLat, originLng), new google.maps.LatLng(destinationLat, destinationLng));
     distance = (distance / 1000).toFixed(2);
@@ -207,20 +219,16 @@ class App extends Component {
           Neighborhood Map
         </header>
         <div className="main-container">
-          <div className="sidebar-container">
-            <Sidebar
-              searchPlaces={this.searchPlaces}
-              map={window.map}
-              locations={this.state.locations}
-              markers={this.state.markers}
-              newMarker={window.newMarker}
-              getPlacesDetails={this.getPlacesDetails}
-              >
-              </Sidebar>
-          </div>
-          <div className="map-container">
-            <MapContainer></MapContainer>
-          </div>
+          <Sidebar
+            searchPlaces={this.searchPlaces}
+            map={window.map}
+            places={this.state.places}
+            markers={this.state.markers}
+            newMarker={window.newMarker}
+            getPlacesDetails={this.getPlacesDetails}
+            >
+          </Sidebar>
+          <Map></Map>
         </div>
         <footer></footer>
       </div>

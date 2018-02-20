@@ -6,9 +6,9 @@ import Search from "./Search"
 class Sidebar extends Component {
 
   render() {
-    const {locations, markers, newMarker, getPlacesDetails} = this.props
+    const {markers} = this.props
     return(
-      <div>
+      <div className="sidebar-container">
         <div className="sidebar-header">
           <h3>Find workshops near you</h3>
         </div>
@@ -21,7 +21,7 @@ class Sidebar extends Component {
               <li
                 key={marker.id}
                 onClick={() => {google.maps.event.trigger(marker, "click")}}
-                >{marker.name} {marker.distance}
+                ><p className="listing-name">{marker.name}</p> <span>{marker.distance}</span>
               </li>
             ))}
           </ul>
