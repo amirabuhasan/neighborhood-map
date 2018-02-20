@@ -13,6 +13,7 @@ class App extends Component {
     this.state = {
       locations: [],
       markers: [],
+      userMarker: [],
       currentLocation: {}
     }
   }
@@ -23,15 +24,22 @@ class App extends Component {
       zoom: 6
     });
     this.checkUserLocation()
+    this.createUserMarker()
+    this.createMarker()
+
+    console.log(this.state.locations)
   }
 
   componentDidUpdate(previousProps, previousState) {
-    window.map.setCenter(this.state.currentLocation)
+    // window.map.setCenter(this.state.currentLocation)
     if (previousState.locations !== this.state.locations) {
+      this.state.userMarker.setMap(null)
       this.state.markers.map((marker) => {
         marker.setMap(null)
       })
+      this.setState({ userMarker: [] })
       this.setState({ markers: [] })
+      this.createUserMarker()
       this.createMarker()
     }
   }
@@ -56,24 +64,44 @@ class App extends Component {
     let markers = []
     let self = this
     let bounds = new google.maps.LatLngBounds()
+    var infowindow = new google.maps.InfoWindow()
     this.state.locations.map((location) => {
+      console.log(location)
       let marker = new window.google.maps.Marker({
         map: window.map,
         position: location.geometry.location,
         id: location.place_id,
-        name: location.name
+        name: location.name,
+        distance: location.distance
       })
-      var infowindow = new google.maps.InfoWindow()
-       marker.addListener('click', function() {
-        self.getPlacesDetails(this, infowindow)
+      marker.addListener('click', function() {
+       console.log(this)
+       self.getPlacesDetails(this, infowindow)
       });
       markers.push(marker)
       bounds.extend(location.geometry.location)
     })
     this.setState({markers: markers})
-    window.map.fitBounds(bounds);
+    window.map.fitBounds(bounds)
   }
 
+  createUserMarker() {
+    let image = "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"
+    let marker = new google.maps.Marker({
+      position: this.state.currentLocation,
+      title: "Your Location",
+      map: window.map,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 6,
+        strokeColor: '#fbfbfb',
+        strokeOpacity: 0.4,
+        fillOpacity: 1.0,
+        fillColor: '#0096d7'
+      }
+    })
+    this.setState({userMarker: marker})
+  }
 
   getPlacesDetails = (marker, infowindow) => {
     let service = new google.maps.places.PlacesService(window.map);
@@ -89,22 +117,31 @@ class App extends Component {
           innerHTML += '<br>' + place.formatted_address;
         }
         if (place.photos) {
-          innerHTML += `<br><br><div class="swiper-container"><div class="swiper-wrapper">`
-          for (let i = 0; i < place.photos.length; i++){
-            innerHTML += '<div class="swiper-slide"><img src="' + place.photos[i].getUrl(
-                {maxHeight: 200, maxWidth: 300}) + '"></div>';
-          }
-          innerHTML += `</div><div class="swiper-pagination"></div>`
-          innerHTML +="</div>";
+          innerHTML += `<br><br><div class="slider one-time">`
+
+          innerHTML += '<div><img src="' + place.photos[0].getUrl(
+              {maxHeight: 200, maxWidth: 300}) + '"></div>'
+
+          innerHTML +="</div"
         }
         if (place.place_id) {
           innerHTML += `<div class="infowindow-button-container text-center">`
           if (place.formatted_phone_number) {
             innerHTML += "<hr>"
-            innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('tel:${place.formatted_phone_number}','_self')"><i class="fas fa-phone" aria-hidden="true"></i><br>Call</button>`
+            innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('tel:${place.formatted_phone_number}','_self')">
+                          <i class="fas fa-phone" aria-hidden="true"></i><br>Call
+                          </button>`
           }
-          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat()},${place.geometry.location.lng()}&query_place_id=${place.place_id}');"><i class="fas fa-compass  " aria-hidden="true"></i><br>Get Directions</button>`
-          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff[nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');"><i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber</button>`
+          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=
+                        ${place.geometry.location.lat()},${place.geometry.location.lng()}
+                        &query_place_id=${place.place_id}');"><i class="fas fa-compass"
+                        aria-hidden="true"></i><br>Get Directions
+                        </button>`
+          innerHTML += `<button class="infowindow-buttons" type="button" onclick=
+                        "window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff
+                        [nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');">
+                        <i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber
+                        </button>`
           innerHTML += "</div>"
         }
         innerHTML += '</div>';
@@ -148,9 +185,20 @@ class App extends Component {
   callback = (results, status) => {
     let self = this
     if (status == google.maps.places.PlacesServiceStatus.OK) {
+      results.map((result) => {
+        this.calculateDistance(this.state.currentLocation.lat, this.state.currentLocation.lng,
+                                result.geometry.location.lat(), result.geometry.location.lng(),
+                                result)
+      })
       this.setState({locations: results})
     }
   }
+
+  calculateDistance = (originLat, originLng, destinationLat, destinationLng, location) => {
+    let distance = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(originLat, originLng), new google.maps.LatLng(destinationLat, destinationLng));
+    distance = (distance / 1000).toFixed(2);
+    location.distance = distance + "km"
+  };
 
   render() {
     return (
