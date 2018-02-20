@@ -216,7 +216,7 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          Neighborhood Map
+          Search for Car Workshops Around You
         </header>
         <div className="main-container">
           <Sidebar
