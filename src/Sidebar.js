@@ -19,11 +19,13 @@ class Sidebar extends Component {
           <ul className="sidebar-listing">
             {markers.map((marker) => (
               <li
+                className="listing"
                 key={marker.id}
                 onClick={() => {google.maps.event.trigger(marker, "click")}}
                 >
                 <p className="listing-name">{marker.name}</p>
-                <p>{marker.distance}</p>
+                <span><i class="fa fa-map-marker" aria-hidden="true"></i></span>
+                <span> {marker.distance}</span>
               </li>
             ))}
           </ul>

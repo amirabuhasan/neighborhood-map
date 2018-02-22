@@ -82,7 +82,7 @@ footer {
   grid-area: map-container;
 }
 
-li {
+.listing {
   padding: 15px;
   list-style-type: none;
   text-align: left;
@@ -90,6 +90,13 @@ li {
   align-items: center;
   font-size: 0.9em;
 }
+
+.listing span {
+  font-size: 0.7em;
+}
+
+
+
 
 .listing-name {
   padding: 0px;
