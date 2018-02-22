@@ -7,6 +7,7 @@
     "main-container"
     "footer";
   grid-gap: 20px;
+  font-family: "Avenir"
 }
 
 html, body, #root, .App, .map-container, #map {
@@ -19,7 +20,7 @@ html, body, #root, .App, .map-container, #map {
   grid-template-columns: 1fr 3fr;
   grid-template-areas:
     "sidebar-container map-container";
-  grid-gap: 20px;
+
 }
 
 .App-header {
@@ -59,19 +60,22 @@ footer {
 .map-info-window {
   border-color: black;
   max-width: 300px;
+  text-align: center;
 }
 
 .sidebar-container {
   grid-area: sidebar-container;
   width: 23em;
+  padding: 20px;
+  background-color: #17D1AB;
+  color: white;
 }
 
 .sidebar-listing-container {
   max-height: 80%;
   position: fixed;
   overflow-y: scroll;
-  max-width: 23em;
-
+  max-width: 25em;
 }
 
 .sidebar-listing {

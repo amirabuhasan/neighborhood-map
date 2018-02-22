@@ -16,11 +16,12 @@ class App extends Component {
       userMarker: [],
       currentLocation: {}
     }
+    this.map;
   }
 
   // initializes the map. Checks for user's location, creates initial user marker and markers.
   componentDidMount() {
-    window.map = new google.maps.Map(document.getElementById("map"), {
+    this.map = new google.maps.Map(document.getElementById("map"), {
       center: new google.maps.LatLng(4.210483999999999, 101.97576600000002),
       zoom: 6
     });
@@ -71,7 +72,7 @@ class App extends Component {
     var infowindow = new google.maps.InfoWindow()
     this.state.places.map((place) => {
       let marker = new window.google.maps.Marker({
-        map: window.map,
+        map: this.map,
         position: place.geometry.location,
         id: place.place_id,
         name: place.name,
@@ -85,7 +86,7 @@ class App extends Component {
       bounds.extend(place.geometry.location)
     })
     this.setState({ markers: markers })
-    window.map.fitBounds(bounds)
+    this.map.fitBounds(bounds)
   }
 
   // Creates a marker to display user's current/searched location
@@ -94,7 +95,7 @@ class App extends Component {
     let marker = new google.maps.Marker({
       position: this.state.currentLocation,
       title: "Your Location",
-      map: window.map,
+      map: this.map,
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 6,
@@ -110,7 +111,8 @@ class App extends Component {
 
   // Get's the place details of a clicked marker, and appends it to the info windows.
   getPlacesDetails = (marker, infowindow) => {
-    let service = new google.maps.places.PlacesService(window.map);
+    let service = new google.maps.places.PlacesService(this.map);
+    let self = this
     service.getDetails({
       placeId: marker.id
     }, function(place, status) {
@@ -152,7 +154,7 @@ class App extends Component {
         }
         innerHTML += '</div>';
         infowindow.setContent(innerHTML);
-        infowindow.open(window.map, marker);
+        infowindow.open(self.map, marker);
         infowindow.addListener('closeclick', function() {
           infowindow.marker = null;
         })
@@ -164,10 +166,10 @@ class App extends Component {
   // to the searched location. Also searches for nearby workshops by calling serviceSearch()
   searchPlaces = () => {
     let self = this;
-    let placesService = new google.maps.places.PlacesService(window.map);
+    let placesService = new google.maps.places.PlacesService(this.map);
     placesService.textSearch({
       query: document.getElementById("search-text").value,
-      bounds: window.map.getBounds()
+      bounds: this.map.getBounds()
     }, function(results, status) {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
         self.setState({
@@ -183,7 +185,7 @@ class App extends Component {
   // Searches for nearby workshops using Google's nearbySearch, and passes a callback method
   // to handle the results
   serviceSearch = () => {
-    let service = new google.maps.places.PlacesService(window.map);
+    let service = new google.maps.places.PlacesService(this.map);
     service.nearbySearch({
       location: this.state.currentLocation,
       rankBy: google.maps.places.RankBy.DISTANCE,
@@ -221,10 +223,9 @@ class App extends Component {
         <div className="main-container">
           <Sidebar
             searchPlaces={this.searchPlaces}
-            map={window.map}
+            map={this.map}
             places={this.state.places}
             markers={this.state.markers}
-            newMarker={window.newMarker}
             getPlacesDetails={this.getPlacesDetails}
             >
           </Sidebar>
