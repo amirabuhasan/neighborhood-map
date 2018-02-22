@@ -21,7 +21,9 @@ class Sidebar extends Component {
               <li
                 key={marker.id}
                 onClick={() => {google.maps.event.trigger(marker, "click")}}
-                ><p className="listing-name">{marker.name}</p> <span>{marker.distance}</span>
+                >
+                <p className="listing-name">{marker.name}</p>
+                <p>{marker.distance}</p>
               </li>
             ))}
           </ul>
