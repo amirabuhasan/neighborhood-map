@@ -48,16 +48,15 @@ class App extends Component {
 
   // Checks a user's current location using the browser's gps.
   // Conducts a service search for workshops nearby by calling serviceSearch()
-  checkUserLocation() {
-    const self = this;
+  checkUserLocation = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        self.setState({
+      navigator.geolocation.getCurrentPosition((position) => {
+        this.setState({
           currentLocation: {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           }
-        }, () => self.serviceSearch()
+        }, () => this.serviceSearch()
       )}, function() {
         alert("You denied access!");
       })
@@ -66,8 +65,8 @@ class App extends Component {
 
   // creates markers on the map for each location. Also adds click listeners.
   createMarkers = () => {
-    let markers = []
     let self = this
+    let markers = []
     let bounds = new google.maps.LatLngBounds()
     var infowindow = new google.maps.InfoWindow()
     this.state.places.map((place) => {
@@ -79,7 +78,6 @@ class App extends Component {
         distance: place.distance
       })
       marker.addListener('click', function() {
-       console.log(this)
        self.getPlacesDetails(this, infowindow)
       });
       markers.push(marker)
@@ -165,19 +163,18 @@ class App extends Component {
   // Conducts a text search using Google's textSearch, and set's the currentLocation
   // to the searched location. Also searches for nearby workshops by calling serviceSearch()
   searchPlaces = () => {
-    let self = this;
     let placesService = new google.maps.places.PlacesService(this.map);
     placesService.textSearch({
       query: document.getElementById("search-text").value,
       bounds: this.map.getBounds()
-    }, function(results, status) {
+    }, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        self.setState({
+        this.setState({
           currentLocation: {
             lat: results[0].geometry.location.lat(),
             lng: results[0].geometry.location.lng()
           }
-        }, () => self.serviceSearch()
+        }, () => this.serviceSearch()
       )}
     })
   }
@@ -196,7 +193,6 @@ class App extends Component {
   // Returns the results of the search and updates the places state with the results.
   // Also runs calculateDistance()
   callback = (results, status) => {
-    let self = this
     if (status == google.maps.places.PlacesServiceStatus.OK) {
       results.map((result) => {
         this.calculateDistance(this.state.currentLocation.lat, this.state.currentLocation.lng,
