@@ -14,7 +14,9 @@ class Search extends Component {
       <div className="sidebar-search">
         <p className="text">Search for nearby workshops around a location</p>
         <input id="search-text" type="text" placeholder="Ex: Petaling Jaya" />
-        <input type="button"
+        <input
+          className="sidebar-button"
+          type="button"
           value="Go"
           onClick={this.props.searchPlaces}
         />

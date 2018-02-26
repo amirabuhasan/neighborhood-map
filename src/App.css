@@ -82,6 +82,17 @@ footer {
   padding: 0px !important;
 }
 
+.sidebar-button {
+  background-color: black;
+  color: white;
+  border: 0;
+}
+
+select, input, button {
+    border-width: 0px;
+}
+
+
 .map-container {
   grid-area: map-container;
 }
@@ -103,9 +114,6 @@ footer {
 .listing span {
   font-size: 0.7em;
 }
-
-
-
 
 .listing-name {
   padding: 0px;
