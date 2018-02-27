@@ -25,25 +25,26 @@ class App extends Component {
       center: new google.maps.LatLng(4.210483999999999, 101.97576600000002),
       zoom: 6
     });
-
     this.checkUserLocation()
-    this.createUserMarker()
-    this.createMarkers()
   }
 
   // everytime the dom re-renders i.e. because user conducts a search,
   // clears all markers on the map, and creates new ones based on user's new location
   componentDidUpdate(previousProps, previousState) {
     if (previousState.places !== this.state.places) {
-      this.state.userMarker.setMap(null)
-      this.state.markers.map((marker) => {
-        marker.setMap(null)
-      })
-      this.setState({ userMarker: [] })
-      this.setState({ markers: [] })
       this.createUserMarker()
       this.createMarkers()
     }
+  }
+
+  clearMarkers() {
+    this.setState({ markers: [] })
+    this.setState({ userMarker: []})
+
+    this.state.userMarker.setMap(null)
+    this.state.markers.map((marker) => {
+      marker.setMap(null)
+    })
   }
 
   // Checks a user's current location using the browser's gps.
@@ -174,7 +175,10 @@ class App extends Component {
             lat: results[0].geometry.location.lat(),
             lng: results[0].geometry.location.lng()
           }
-        }, () => this.serviceSearch()
+        }, () => {
+          this.clearMarkers()
+          this.serviceSearch()
+        }
       )}
     })
   }
