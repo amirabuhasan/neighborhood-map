@@ -5,6 +5,7 @@ import logo from './logo.svg';
 import './App.css';
 import Sidebar from "./Sidebar"
 import Map from "./Map"
+import * as Api from "./Api"
 
 
 class App extends Component {
@@ -107,7 +108,6 @@ class App extends Component {
     this.setState({userMarker: marker})
   }
 
-
   // Get's the place details of a clicked marker, and appends it to the info windows.
   getPlacesDetails = (marker, infowindow) => {
     let service = new google.maps.places.PlacesService(this.map);
@@ -116,6 +116,7 @@ class App extends Component {
       placeId: marker.id
     }, function(place, status) {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
+
         var innerHTML = `<div class="map-info-window" id="${place.id}" name="${place.id}">`;
         if (place.name) {
           innerHTML += '<strong>' + place.name + '</strong>';
@@ -150,13 +151,18 @@ class App extends Component {
                         <i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber
                         </button>`
           innerHTML += "</div>"
+          Api.uberRequestEstimate(self.state.currentLocation.lat, self.state.currentLocation.lng,
+          place.geometry.location.lat(), place.geometry.location.lng()).then(response => {
+            innerHTML += `<p>${response.fare.display}</p>`
+            console.log(response)
+            innerHTML += '</div>';
+            infowindow.setContent(innerHTML);
+            infowindow.open(self.map, marker);
+            infowindow.addListener('closeclick', function() {
+              infowindow.marker = null;
+            })
+          })
         }
-        innerHTML += '</div>';
-        infowindow.setContent(innerHTML);
-        infowindow.open(self.map, marker);
-        infowindow.addListener('closeclick', function() {
-          infowindow.marker = null;
-        })
       }
     })
   }
@@ -202,6 +208,8 @@ class App extends Component {
         this.calculateDistance(this.state.currentLocation.lat, this.state.currentLocation.lng,
                                 result.geometry.location.lat(), result.geometry.location.lng(),
                                 result)
+        // Api.uberRequestEstimate(this.state.currentLocation.lat, this.state.currentLocation.lng,
+        // result.geometry.location.lat(), result.geometry.location.lng())
       })
       this.setState({places: results})
     }
