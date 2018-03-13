@@ -6,6 +6,7 @@ import './App.css';
 import Sidebar from "./Sidebar"
 import Map from "./Map"
 import * as Api from "./Api"
+import Loading from "./Loading"
 
 
 class App extends Component {
@@ -15,7 +16,9 @@ class App extends Component {
       places: [],
       markers: [],
       userMarker: [],
-      currentLocation: {}
+      userLocation: {},
+      currentLocation: {},
+      loading: true
     }
     this.map;
   }
@@ -54,6 +57,10 @@ class App extends Component {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         this.setState({
+          userLocation: {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          },
           currentLocation: {
             lat: position.coords.latitude,
             lng: position.coords.longitude
@@ -140,29 +147,24 @@ class App extends Component {
                           <i class="fas fa-phone" aria-hidden="true"></i><br>Call
                           </button>`
           }
-          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=
-                        ${place.geometry.location.lat()},${place.geometry.location.lng()}
-                        &query_place_id=${place.place_id}');"><i class="fas fa-compass"
-                        aria-hidden="true"></i><br>Get Directions
+          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat()},${place.geometry.location.lng()}&query_place_id=${place.place_id}');"><i class="fas fa-compass"aria-hidden="true"></i><br>Get Directions
                         </button>`
-          innerHTML += `<button class="infowindow-buttons" type="button" onclick=
-                        "window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff
-                        [nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');">
+          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff[nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');">
                         <i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber
+                        <p id="uber-fare">Calculating Fare</p>
                         </button>`
           innerHTML += "</div>"
-          Api.uberRequestEstimate(self.state.currentLocation.lat, self.state.currentLocation.lng,
-          place.geometry.location.lat(), place.geometry.location.lng()).then(response => {
-            innerHTML += `<p>${response.fare.display}</p>`
-            console.log(response)
-            innerHTML += '</div>';
-            infowindow.setContent(innerHTML);
-            infowindow.open(self.map, marker);
-            infowindow.addListener('closeclick', function() {
-              infowindow.marker = null;
-            })
-          })
         }
+        innerHTML += '</div>';
+        infowindow.setContent(innerHTML);
+        infowindow.open(self.map, marker);
+        infowindow.addListener('closeclick', function() {
+          infowindow.marker = null;
+        })
+        Api.uberRequestEstimate(self.state.userLocation.lat, self.state.userLocation.lng,
+        place.geometry.location.lat(), place.geometry.location.lng()).then(response => {
+          document.getElementById("uber-fare").innerHTML = `<p>(${response.fare.display})</p>`
+        })
       }
     })
   }
@@ -237,7 +239,8 @@ class App extends Component {
             getPlacesDetails={this.getPlacesDetails}
             >
           </Sidebar>
-          <Map></Map>
+          <Map>
+          </Map>
         </div>
         <footer></footer>
       </div>
