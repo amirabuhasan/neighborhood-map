@@ -1,3 +1,5 @@
+
+// sends a POST request to the Uber API to get a Ride Estimate.
 export const uberRequestEstimate = (startLatitude, startLongitude, endLatitude, endLongitude) =>
     fetch("https://cors-anywhere.herokuapp.com/https://api.uber.com/v1.2/requests/estimate", {
       method: 'POST',

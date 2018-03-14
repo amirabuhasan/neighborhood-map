@@ -6,7 +6,6 @@ import './App.css';
 import Sidebar from "./Sidebar"
 import Map from "./Map"
 import * as Api from "./Api"
-import Loading from "./Loading"
 
 
 class App extends Component {
@@ -18,22 +17,27 @@ class App extends Component {
       userMarker: [],
       userLocation: {},
       currentLocation: {},
-      loading: true
+      mobileView: false,
+      hideButton: false
     }
     this.map;
   }
 
   // initializes the map. Checks for user's location, creates initial user marker and markers.
   componentDidMount() {
+    window.addEventListener("resize", this.renderMobile.bind(this))
+    window.addEventListener("resize", this.renderButton.bind(this))
+    this.renderMobile()
+    this.renderButton()
+
     this.map = new google.maps.Map(document.getElementById("map"), {
       center: new google.maps.LatLng(4.210483999999999, 101.97576600000002),
       zoom: 6
-    });
+    })
     this.checkUserLocation()
   }
 
-  // everytime the dom re-renders i.e. because user conducts a search,
-  // clears all markers on the map, and creates new ones based on user's new location
+  // calls createUserMarker and createMarkers everytime the component updates
   componentDidUpdate(previousProps, previousState) {
     if (previousState.places !== this.state.places) {
       this.createUserMarker()
@@ -118,10 +122,9 @@ class App extends Component {
   // Get's the place details of a clicked marker, and appends it to the info windows.
   getPlacesDetails = (marker, infowindow) => {
     let service = new google.maps.places.PlacesService(this.map);
-    let self = this
     service.getDetails({
       placeId: marker.id
-    }, function(place, status) {
+    }, (place, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
 
         var innerHTML = `<div class="map-info-window" id="${place.id}" name="${place.id}">`;
@@ -151,19 +154,20 @@ class App extends Component {
                         </button>`
           innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff[nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');">
                         <i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber
-                        <p id="uber-fare">Calculating Fare</p>
+                        <span id="uber-fare">(Calculating Fare)</span>
                         </button>`
           innerHTML += "</div>"
         }
         innerHTML += '</div>';
         infowindow.setContent(innerHTML);
-        infowindow.open(self.map, marker);
+        infowindow.open(this.map, marker);
         infowindow.addListener('closeclick', function() {
           infowindow.marker = null;
         })
-        Api.uberRequestEstimate(self.state.userLocation.lat, self.state.userLocation.lng,
+        // passes the user's current location, and the location of the clicked marker to uberRequestEstimate() to get an estimated fare for an Uber ride
+        Api.uberRequestEstimate(this.state.userLocation.lat, this.state.userLocation.lng,
         place.geometry.location.lat(), place.geometry.location.lng()).then(response => {
-          document.getElementById("uber-fare").innerHTML = `<p>(${response.fare.display})</p>`
+          document.getElementById("uber-fare").innerHTML = `<span>(${response.fare.display})</span>`
         })
       }
     })
@@ -210,8 +214,6 @@ class App extends Component {
         this.calculateDistance(this.state.currentLocation.lat, this.state.currentLocation.lng,
                                 result.geometry.location.lat(), result.geometry.location.lng(),
                                 result)
-        // Api.uberRequestEstimate(this.state.currentLocation.lat, this.state.currentLocation.lng,
-        // result.geometry.location.lat(), result.geometry.location.lng())
       })
       this.setState({places: results})
     }
@@ -224,21 +226,51 @@ class App extends Component {
     location.distance = distance + "km"
   };
 
+  renderMobile = () => {
+    if (window.innerWidth < 980) {
+      this.setState({mobileView: true})
+    } else {
+      this.setState({mobileView: false})
+    }
+  }
+
+  toggleNav = () => {
+    this.setState({mobileView: !this.state.mobileView})
+  }
+
+  renderButton = () => {
+    if (window.innerWidth < 980) {
+      this.setState({hideButton: false})
+    } else {
+      this.setState({hideButton: true})
+    }
+  }
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          Search for Car Workshops Around You
+          <h3>Search for Car Workshops Around You</h3>
+          {!this.state.hideButton &&
+            <div className="hamburger-container" onClick={this.toggleNav}>
+              <div className="hamburger"></div>
+              <div className="hamburger"></div>
+              <div className="hamburger"></div>
+            </div>
+          }
         </header>
         <div className="main-container">
+          {(this.state.mobileView == false) &&
           <Sidebar
             searchPlaces={this.searchPlaces}
             map={this.map}
             places={this.state.places}
             markers={this.state.markers}
             getPlacesDetails={this.getPlacesDetails}
+            toggleNav = {this.toggleNav}
             >
           </Sidebar>
+        }
           <Map>
           </Map>
         </div>

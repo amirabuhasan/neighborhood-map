@@ -17,10 +17,10 @@ html, body, #root, .App, .map-container, #map {
 .main-container {
   grid-area: main-container;
   display: grid;
+  height: 100%;
   grid-template-columns: 1fr 3fr;
   grid-template-areas:
     "sidebar-container map-container";
-
 }
 
 .App-header {
@@ -29,6 +29,22 @@ html, body, #root, .App, .map-container, #map {
   background-color: #222;
   padding: 20px;
   color: white;
+}
+
+.hamburger {
+    width: 35px;
+    height: 5px;
+    background-color: white;
+    margin: 6px 0;
+    text-align: right;
+    right: 0;
+}
+
+.hamburger-container {
+  width: 30%;
+  padding: 0.5em;
+  margin-right: auto;
+  cursor: pointer;
 }
 
 .App-title {
@@ -53,8 +69,14 @@ footer {
   border: none;
 }
 
+#uber-fare {
+  font-size: 0.7em;
+  text-align: center;
+}
+
 .infowindow-buttons:hover {
-  color: Crimson;
+  color: #17D1AB;
+  cursor: pointer;
 }
 
 .map-info-window {
@@ -69,17 +91,22 @@ footer {
   padding: 20px;
   background-color: #17D1AB;
   color: white;
+  z-index: 1000;
+  top: 0;
+  height: 100%;
 }
 
 .sidebar-listing-container {
   max-height: 100%;
-  position: fixed;
   overflow-y: scroll;
   max-width: 25em;
+  position: fixed;
 }
 
 .sidebar-listing {
   padding: 0px !important;
+  margin: 0;
+  height: 100%;
 }
 
 .sidebar-button {
@@ -92,16 +119,16 @@ select, input, button {
     border-width: 0px;
 }
 
-
 .map-container {
   grid-area: map-container;
+  width: 100%;
+  height: 100%;
 }
 
 .listing {
   padding: 15px;
   list-style-type: none;
   text-align: left;
-  display: block;
   align-items: center;
   font-size: 0.9em;
 }
@@ -118,4 +145,28 @@ select, input, button {
 .listing-name {
   padding: 0px;
   margin: 0px;
+}
+
+@media all and (max-width: 980px) {
+  .main-container {
+    display: initial;
+  }
+}
+
+@media all and (max-width: 736px) {
+  .main-container {
+    display: initial;
+  }
+}
+
+@media all and (max-width: 480px) {
+  .main-container {
+    display: initial;
+  }
+  .sidebar-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 100000;
+  }
 }
