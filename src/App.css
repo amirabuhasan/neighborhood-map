@@ -29,6 +29,7 @@ html, body, #root, .App, .map-container, #map {
   background-color: #222;
   padding: 20px;
   color: white;
+  z-index: 2000;
 }
 
 .hamburger {
@@ -92,27 +93,35 @@ footer {
   background-color: #17D1AB;
   color: white;
   z-index: 1000;
-  top: 0;
-  height: 100%;
+}
+
+.sidebar-search {
+  z-index: 1000000;
+}
+
+#search-text {
+  z-index: 1000000;
 }
 
 .sidebar-listing-container {
   max-height: 100%;
-  overflow-y: scroll;
   max-width: 25em;
-  position: fixed;
 }
 
 .sidebar-listing {
   padding: 0px !important;
   margin: 0;
-  height: 100%;
 }
 
 .sidebar-button {
   background-color: black;
   color: white;
   border: 0;
+}
+
+.pagination {
+  bottom: 0;
+  position: absolute;
 }
 
 select, input, button {
@@ -151,11 +160,31 @@ select, input, button {
   .main-container {
     display: initial;
   }
+  .sidebar-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 100000;
+  }
+  .App-header {
+    display: grid;
+    grid-template-columns: 1fr 5fr;
+  }
 }
 
 @media all and (max-width: 736px) {
   .main-container {
     display: initial;
+  }
+  .sidebar-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 100000;
+  }
+  .App-header {
+    display: grid;
+    grid-template-columns: 1fr 5fr;
   }
 }
 
@@ -167,6 +196,16 @@ select, input, button {
     width: 100%;
     height: 100%;
     position: absolute;
-    z-index: 100000;
+    z-index: 10;
+  }
+  .App-header {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+  }
+  .App-header h3 {
+    font-size: 1em;
+  }
+  .hamburger-container {
+    margin: 5px;
   }
 }

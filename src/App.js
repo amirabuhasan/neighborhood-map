@@ -250,7 +250,6 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <h3>Search for Car Workshops Around You</h3>
           {!this.state.hideButton &&
             <div className="hamburger-container" onClick={this.toggleNav}>
               <div className="hamburger"></div>
@@ -258,6 +257,8 @@ class App extends Component {
               <div className="hamburger"></div>
             </div>
           }
+          <h3>Search for Car Workshops Around You</h3>
+
         </header>
         <div className="main-container">
           {(this.state.mobileView == false) &&

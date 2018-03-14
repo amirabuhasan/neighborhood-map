@@ -59,14 +59,16 @@ class Sidebar extends Component {
               </li>
             ))}
           </ul>
-          {this.state.currentPage > 1 && (
-            <button onClick={this.prevPage}>Previous</button>
-          )}
-          {this.state.currentPage < 4 && (
-            <button onClick={this.nextPage}>Next</button>
-          )
-          }
-          <p>{this.state.currentPage}</p>
+          <div className="pagination">
+            {this.state.currentPage > 1 && (
+              <button onClick={this.prevPage}>Previous</button>
+            )}
+            {this.state.currentPage < 4 && (
+              <button onClick={this.nextPage}>Next</button>
+            )
+            }
+            <p>{this.state.currentPage}</p>
+          </div>
         </div>
       </div>
     )
