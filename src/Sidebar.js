@@ -23,19 +23,11 @@ class Sidebar extends Component {
     })
   }
 
-  // componentDidUpdate = (previousProps, previousState) => {
-  //   if (previousProps == this.state) {
-  //     this.displayMarkers()
-  //   }
-  // }
-
   componentWillReceiveProps(nextProps) {
     if (nextProps.markers !== this.state.markers) {
       this.setState({markers: nextProps.markers})
     }
   }
-
-
 
   displayMarkers = () => {
     let markers = this.state.markers

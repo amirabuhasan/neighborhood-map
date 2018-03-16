@@ -131,7 +131,6 @@ class App extends Component {
       placeId: marker.id
     }, (place, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-
         var innerHTML = `<div class="map-info-window" id="${place.id}" name="${place.id}">`;
         if (place.name) {
           innerHTML += '<strong>' + place.name + '</strong>';
@@ -169,13 +168,18 @@ class App extends Component {
         infowindow.addListener('closeclick', function() {
           infowindow.marker = null;
           marker.setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
-
         })
         // passes the user's current location, and the location of the clicked marker to uberRequestEstimate() to get an estimated fare for an Uber ride
         Api.uberRequestEstimate(this.state.userLocation.lat, this.state.userLocation.lng,
         place.geometry.location.lat(), place.geometry.location.lng()).then(response => {
-          document.getElementById("uber-fare").innerHTML = `<span>(${response.fare.display})</span>`
+          let uberFare = document.getElementById("uber-fare")
+          if (uberFare) {
+            uberFare.innerHTML = `<span>(${response.fare.display})</span>`
+          } else {
+            uberFare = ""
+          }
         })
+        .catch(e => alert("There was an error processing your request"))
       }
     })
   }
