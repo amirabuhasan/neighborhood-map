@@ -168,6 +168,8 @@ class App extends Component {
         infowindow.open(this.map, marker);
         infowindow.addListener('closeclick', function() {
           infowindow.marker = null;
+          marker.setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
+
         })
         // passes the user's current location, and the location of the clicked marker to uberRequestEstimate() to get an estimated fare for an Uber ride
         Api.uberRequestEstimate(this.state.userLocation.lat, this.state.userLocation.lng,

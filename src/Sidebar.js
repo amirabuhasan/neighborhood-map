@@ -7,7 +7,8 @@ class Sidebar extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      currentPage: 1
+      currentPage: 1,
+      markers: []
     }
   }
 
@@ -22,7 +23,41 @@ class Sidebar extends Component {
     })
   }
 
+  // componentDidUpdate = (previousProps, previousState) => {
+  //   if (previousProps == this.state) {
+  //     this.displayMarkers()
+  //   }
+  // }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.markers !== this.state.markers) {
+      this.setState({markers: nextProps.markers})
+    }
+  }
+
+
+
+  displayMarkers = () => {
+    let markers = this.state.markers
+    let resultsPerPage = 5
+    let markersToShow = []
+    for (let i = 0; i < markers.length; i++) {
+      markers[i].i = i
+    }
+    markers.map(marker => {
+      if (marker.i >= resultsPerPage * this.state.currentPage - 5 && marker.i < resultsPerPage * this.state.currentPage) {
+        markersToShow.push(marker)
+        marker.setMap(this.props.map)
+      } else {
+        marker.setMap(null)
+      }
+    })
+    return markersToShow
+  }
+
   render() {
+    let markersToShow = this.displayMarkers()
+    console.log(markersToShow)
     const {markers} = this.props
     for (let i = 0; i < markers.length; i++) {
       markers[i].i = i
@@ -40,8 +75,8 @@ class Sidebar extends Component {
         </div>
         <div className="sidebar-listing-container">
           <ul className="sidebar-listing">
-            {markers.map(marker =>
-              marker.i >= resultsPerPage * this.state.currentPage - 5 && marker.i < resultsPerPage * this.state.currentPage
+            {markersToShow.map(marker =>
+              marker
               && (
               <li
                 className="listing"
