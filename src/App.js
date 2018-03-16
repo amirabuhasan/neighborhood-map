@@ -90,8 +90,13 @@ class App extends Component {
         name: place.name,
         distance: place.distance
       })
+      marker.setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
       marker.addListener('click', function() {
        self.getPlacesDetails(this, infowindow)
+       for (let i = 0; i < markers.length; i++) {
+         markers[i].setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
+       }
+       this.setIcon("http://maps.google.com/mapfiles/ms/micons/yellow-dot.png")
       });
       markers.push(marker)
       bounds.extend(place.geometry.location)
