@@ -181,7 +181,7 @@ class App extends Component {
             uberFare = ""
           }
         })
-        .catch(e => alert("There was an error processing your request"))
+        .catch(e => alert("There was an error with getting an Uber Fare estimate."))
       }
     })
   }
