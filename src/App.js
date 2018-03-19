@@ -29,7 +29,6 @@ class App extends Component {
     window.addEventListener("resize", this.renderButton.bind(this))
     this.renderMobile()
     this.renderButton()
-
     this.map = new google.maps.Map(document.getElementById("map"), {
       center: new google.maps.LatLng(4.210483999999999, 101.97576600000002),
       zoom: 6
@@ -272,10 +271,8 @@ class App extends Component {
             </div>
           }
           <h3>Search for Car Workshops Around You</h3>
-
         </header>
         <div className="main-container">
-          {(this.state.mobileView == false) &&
           <Sidebar
             searchPlaces={this.searchPlaces}
             map={this.map}
@@ -283,9 +280,9 @@ class App extends Component {
             markers={this.state.markers}
             getPlacesDetails={this.getPlacesDetails}
             toggleNav = {this.toggleNav}
+            mobileView = {this.state.mobileView}
             >
           </Sidebar>
-        }
           <Map>
           </Map>
         </div>
