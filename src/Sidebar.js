@@ -12,30 +12,38 @@ class Sidebar extends Component {
     }
   }
 
+// handles nextPage toggling
   nextPage = () => {
     this.setState({
       currentPage: this.state.currentPage + 1
     })
   }
+
+// handles prevPage toggling
   prevPage = () => {
     this.setState({
       currentPage: this.state.currentPage - 1
     })
   }
 
+// upon receiving new props from parent, sets the markers state to the new props.
   componentWillReceiveProps(nextProps) {
     if (nextProps.markers !== this.state.markers) {
       this.setState({markers: nextProps.markers})
     }
   }
 
+// Filters markers to 5 per page, and determines which markers to display on what page. Returns an array of markersToShow
   displayMarkers = () => {
     let markers = this.state.markers
     let resultsPerPage = 5
     let markersToShow = []
+    // sets and index for each marker starting from 0 and ending with 20
     for (let i = 0; i < markers.length; i++) {
       markers[i].i = i
     }
+
+    // maps through each marker in the markers state. Determines which page to display the marker, based on the marker's index
     markers.map(marker => {
       if (marker.i >= resultsPerPage * this.state.currentPage - 5 && marker.i < resultsPerPage * this.state.currentPage) {
         markersToShow.push(marker)
@@ -49,12 +57,6 @@ class Sidebar extends Component {
 
   render() {
     let markersToShow = this.displayMarkers()
-    console.log(markersToShow)
-    const {markers} = this.props
-    for (let i = 0; i < markers.length; i++) {
-      markers[i].i = i
-    }
-    let resultsPerPage = 5
     return(
       <div className="sidebar-container">
         <div className="sidebar-top">

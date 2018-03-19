@@ -23,7 +23,7 @@ class App extends Component {
     this.map;
   }
 
-  // initializes the map. Checks for user's location, creates initial user marker and markers.
+  // initializes the map and runs checkUserLocation().
   componentDidMount() {
     window.addEventListener("resize", this.renderMobile.bind(this))
     window.addEventListener("resize", this.renderButton.bind(this))
@@ -37,26 +37,15 @@ class App extends Component {
     this.checkUserLocation()
   }
 
-  // calls createUserMarker and createMarkers everytime the component updates
+  // checks to see if the places state has updated. If it has, runs createMarkers()
   componentDidUpdate(previousProps, previousState) {
-    if (previousState.places !== this.state.places) {
-      this.createUserMarker()
+    if (this.state.places !== previousState.places) {
       this.createMarkers()
     }
   }
 
-  clearMarkers() {
-    this.setState({ markers: [] })
-    this.setState({ userMarker: []})
-
-    this.state.userMarker.setMap(null)
-    this.state.markers.map((marker) => {
-      marker.setMap(null)
-    })
-  }
-
-  // Checks a user's current location using the browser's gps.
-  // Conducts a service search for workshops nearby by calling serviceSearch()
+  // Checks a user's current location.
+  // Then, conducts a service search for workshops nearby by calling serviceSearch().
   checkUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
@@ -69,14 +58,19 @@ class App extends Component {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           }
-        }, () => this.serviceSearch()
+        }, () => {
+          this.serviceSearch()
+          if (this.state.userLocation !== {}) {
+            this.createUserMarker()
+          }
+        }
       )}, function() {
         alert("You denied access!");
       })
     }
   }
 
-  // creates markers on the map for each location. Also adds click listeners.
+  // creates markers on the map for each location. Also adds click listeners to the markers.
   createMarkers = () => {
     let self = this
     let markers = []
@@ -105,11 +99,19 @@ class App extends Component {
     this.map.fitBounds(bounds)
   }
 
-  // Creates a marker to display user's current/searched location
+  // clears the markers on the map, and empties the markers and userMarker array
+    clearMarkers() {
+      this.setState({ markers: [] })
+      this.state.markers.map((marker) => {
+        marker.setMap(null)
+      })
+    }
+
+  // Creates a marker to display user's current location
   createUserMarker() {
     let image = "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"
     let marker = new google.maps.Marker({
-      position: this.state.currentLocation,
+      position: this.state.userLocation,
       title: "Your Location",
       map: this.map,
       icon: {
@@ -169,7 +171,7 @@ class App extends Component {
           infowindow.marker = null;
           marker.setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
         })
-        // passes the user's current location, and the location of the clicked marker to uberRequestEstimate() to get an estimated fare for an Uber ride
+        // passes the user's current location, and the location of the clicked marker to uberRequestEstimate() to get an estimated fare for an Uber ride.
         Api.uberRequestEstimate(this.state.userLocation.lat, this.state.userLocation.lng,
         place.geometry.location.lat(), place.geometry.location.lng()).then(response => {
           let uberFare = document.getElementById("uber-fare")
@@ -185,7 +187,7 @@ class App extends Component {
   }
 
   // Conducts a text search using Google's textSearch, and set's the currentLocation
-  // to the searched location. Also searches for nearby workshops by calling serviceSearch()
+  // to the searched location. Also runs clearMarkers() and searches for nearby workshops by calling serviceSearch()
   searchPlaces = () => {
     let placesService = new google.maps.places.PlacesService(this.map);
     placesService.textSearch({
@@ -207,7 +209,7 @@ class App extends Component {
   }
 
   // Searches for nearby workshops using Google's nearbySearch, and passes a callback method
-  // to handle the results
+  // to handle the response
   serviceSearch = () => {
     let service = new google.maps.places.PlacesService(this.map);
     service.nearbySearch({
@@ -237,6 +239,7 @@ class App extends Component {
     location.distance = distance + "km"
   };
 
+  // checks to see if the user is accessing the site from a mobile device
   renderMobile = () => {
     if (window.innerWidth < 980) {
       this.setState({mobileView: true})
