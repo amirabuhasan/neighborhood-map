@@ -48,11 +48,18 @@ class Sidebar extends Component {
     return markersToShow
   }
 
+  // handleClick = () => {
+  //   google.maps.event.trigger(marker, "click")
+  //   if (window.innerWidth < 980) {
+  //     this.props.toggleNav()
+  //   }
+  // }
+
   render() {
     let markersToShow = this.displayMarkers()
 
     return (
-      <div>
+      <div className="sidebar">
         {(this.props.mobileView == false &&
           <div className="sidebar-container">
             <div className="sidebar-top">
@@ -69,12 +76,21 @@ class Sidebar extends Component {
                   marker
                   && (
                   <li
+                    tabIndex="0"
                     className="listing"
                     key={marker.id}
                     onClick={() => {
                       google.maps.event.trigger(marker, "click")
                       if (window.innerWidth < 980) {
                         this.props.toggleNav()
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key == "Enter") {
+                        google.maps.event.trigger(marker, "click")
+                        if (window.innerWidth < 980) {
+                          this.props.toggleNav()
+                        }
                       }
                     }}
                     >

@@ -86,6 +86,7 @@ class App extends Component {
       marker.setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
       marker.addListener('click', function() {
        self.getPlacesDetails(this, infowindow)
+       document.getElementById("map").focus()
        for (let i = 0; i < markers.length; i++) {
          markers[i].setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
        }
@@ -143,7 +144,7 @@ class App extends Component {
           innerHTML += `<br><br><div class="slider one-time">`
 
           innerHTML += '<div><img src="' + place.photos[0].getUrl(
-              {maxHeight: 200, maxWidth: 300}) + '"></div>'
+              {maxHeight: 200, maxWidth: 300}) + '" src="Photo of ' + place.name + '"></div>'
 
           innerHTML +="</div"
         }
@@ -151,16 +152,16 @@ class App extends Component {
           innerHTML += `<div class="infowindow-button-container text-center">`
           if (place.formatted_phone_number) {
             innerHTML += "<hr>"
-            innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('tel:${place.formatted_phone_number}','_self')">
+            innerHTML += `<div class="button-container" tabindex="0"><button class="infowindow-buttons" type="button" onclick="window.open('tel:${place.formatted_phone_number}','_self')" tabindex="0">
                           <i class="fas fa-phone" aria-hidden="true"></i><br>Call
-                          </button>`
+                        </button></div>`
           }
-          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat()},${place.geometry.location.lng()}&query_place_id=${place.place_id}');"><i class="fas fa-compass"aria-hidden="true"></i><br>Get Directions
-                        </button>`
-          innerHTML += `<button class="infowindow-buttons" type="button" onclick="window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff[nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');">
+          innerHTML += `<div class="button-container" tabindex="0"><button class="infowindow-buttons" type="button" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat()},${place.geometry.location.lng()}&query_place_id=${place.place_id}');"><i class="fas fa-compass"aria-hidden="true"></i><br>Get Directions
+        </button></div>`
+          innerHTML += `<div class="button-container" tabindex="0"><button class="infowindow-buttons" type="button" onclick="window.open('https://m.uber.com/ul/?action=setPickup&client_id=td2yBpJSiLMHMu3VfkHcZyy6jahPl5ar&pickup=my_location&dropoff[nickname]=${place.name}&dropoff[latitude]=${place.geometry.location.lat()}&dropoff[longitude]=${place.geometry.location.lng()}');" tabindex="0">
                         <i class="fab fa-uber" aria-hidden="true"></i><br>Order Uber
                         <span id="uber-fare">(Calculating Fare)</span>
-                        </button>`
+                      </button></div>`
           innerHTML += "</div>"
         }
         innerHTML += '</div>';
