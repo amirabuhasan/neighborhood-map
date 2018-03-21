@@ -86,7 +86,6 @@ class App extends Component {
       marker.setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
       marker.addListener('click', function() {
        self.getPlacesDetails(this, infowindow)
-       document.getElementById("map").focus()
        for (let i = 0; i < markers.length; i++) {
          markers[i].setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
        }
@@ -133,7 +132,7 @@ class App extends Component {
       placeId: marker.id
     }, (place, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        var innerHTML = `<div class="map-info-window" id="${place.id}" name="${place.id}">`;
+        var innerHTML = `<div class="map-info-window" id="${place.place_id}" name="${place.id}" tabindex="-1">`;
         if (place.name) {
           innerHTML += '<strong>' + place.name + '</strong>';
         }
@@ -167,6 +166,10 @@ class App extends Component {
         innerHTML += '</div>';
         infowindow.setContent(innerHTML);
         infowindow.open(this.map, marker);
+        if (document.getElementById(marker.id)) {
+          document.getElementById(marker.id).focus()
+        }
+
         infowindow.addListener('closeclick', function() {
           infowindow.marker = null;
           marker.setIcon("http://maps.google.com/mapfiles/ms/micons/red-dot.png")
