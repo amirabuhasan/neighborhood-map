@@ -44,7 +44,6 @@ class Sidebar extends Component {
         marker.setMap(null)
       }
     })
-    console.log(markersToShow)
     return markersToShow
   }
 
