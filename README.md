@@ -11,3 +11,7 @@ To run:
   2. Install all project dependencies with npm install.
   3. Launch the app with npm start.
   4. The app can be accessed at localhost:3000
+
+## References
+* Locations used and their information are sourced from the [Google Maps API](https://developers.google.com/maps/documentation/javascript/).
+* Fare estimation is retrieved via the [Uber API](https://developer.uber.com/docs/riders/ride-requests/introduction).
