@@ -12,8 +12,8 @@ class Search extends Component {
   render() {
     return (
       <div className="sidebar-search">
-        <p className="text">Search for nearby workshops around a location</p>
-        <input id="search-text" type="text" placeholder="Ex: Petaling Jaya" />
+        <h5 className="sidebar-search-header">Search for nearby workshops around a location</h5>
+        <input id="search-text" role="search" aria-labelledby="sidebar-search-header" type="text" placeholder="Ex: Petaling Jaya" />
         <input
           className="sidebar-button"
           type="button"

@@ -71,11 +71,12 @@ class Sidebar extends Component {
               />
             </div>
             <div className="sidebar-listing-container">
-              <ul className="sidebar-listing">
+              <ul className="sidebar-listing" role="menu">
                 {markersToShow.map(marker =>
                   marker
                   && (
                   <li
+                    role="button"
                     tabIndex="0"
                     className="listing"
                     key={marker.id}

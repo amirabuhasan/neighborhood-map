@@ -268,7 +268,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           {!this.state.hideButton &&
-            <div className="hamburger-container" onClick={this.toggleNav}>
+            <div className="hamburger-container" aria-expanded={this.state.mobileView ? "true" : "false"} onClick={this.toggleNav}>
               <div className="hamburger"></div>
               <div className="hamburger"></div>
               <div className="hamburger"></div>
