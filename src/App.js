@@ -1,14 +1,22 @@
 /*global google*/
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Sidebar from "./Sidebar"
 import Map from "./Map"
 import * as Api from "./Api"
-
+import { Route } from 'react-router-dom'
 
 class App extends Component {
+  render() {
+    return (
+      <Route exact path={`${process.env.PUBLIC_URL}/`} component={Home} />
+    )
+  }
+}
+
+class Home extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -287,8 +295,8 @@ class App extends Component {
             mobileView = {this.state.mobileView}
             >
           </Sidebar>
-          <Map>
-          </Map>
+          <Map />
+
         </div>
         <footer></footer>
       </div>

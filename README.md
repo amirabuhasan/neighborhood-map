@@ -12,6 +12,8 @@ To run:
   3. Launch the app with npm start.
   4. The app can be accessed at localhost:3000
 
+Alternatively, a working live link can be found here: https://amirabuhasan.github.io/workshop-search/
+
 ## References
 * Locations used and their information are sourced from the [Google Maps API](https://developers.google.com/maps/documentation/javascript/).
 * Fare estimation is retrieved via the [Uber API](https://developer.uber.com/docs/riders/ride-requests/introduction).
